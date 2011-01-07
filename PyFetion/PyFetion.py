@@ -345,7 +345,7 @@ class SIPC():
                     body += '<contact uri="%s" />' % i
                 body += '</contacts></args>'
 
-            elif arg == "AddBuddy":
+            elif arg == "AddBuddyV4":
                 tag = "sip"
                 if len(extra[0]) == 11:
                     tag = "tel"
@@ -354,7 +354,7 @@ class SIPC():
             elif arg == "AddMobileBuddy":
                 body = '<args><contacts><mobile-buddies><mobile-buddy uri="tel:%s" buddy-lists="1" desc="%s" invite="0" /></mobile-buddies></contacts></args>' % (extra[0],extra[1])
 
-            elif arg == "DeleteBuddy":
+            elif arg == "DeleteBuddyV4":
 
                 body = '<args><contacts><buddies><buddy uri="%s" /></buddies></contacts></args>' % extra[0]
 
@@ -920,7 +920,7 @@ class PyFetion(SIPC):
             if not who:
                 return False
 
-        self.get("INFO","DeleteBuddy",who)
+        self.get("INFO","DeleteBuddyV4",who)
         response = self.send()
         code = self.get_code(response)
         if code == 404 or code == 400 :
@@ -930,7 +930,7 @@ class PyFetion(SIPC):
             return True
         return False
 
-    def _add(self,who,nick_name,type="AddBuddy"):
+    def _add(self,who,nick_name,type="AddBuddyV4"):
 
         self.get("INFO",type,who,nick_name)
         response = self.send()
