@@ -1,0 +1,2 @@
+* 添加好友后 好友确认后 会收到消息，KeyError: 'sip:684564302@fetion.com.cn;p=882'
+出现了KEY错误
