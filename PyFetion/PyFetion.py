@@ -28,7 +28,7 @@ FetionAway   = "100"
 FetionHidden  = "0"
 FetionOffline = "365"
 
-FetionVer = "4.1.1160"
+FetionVer = "4.7.1680"#"4.1.1160"
 #"SIPP" USED IN HTTP CONNECTION
 FetionSIPP= "SIPP"
 FetionNavURL = "nav.fetion.com.cn"
@@ -203,7 +203,6 @@ class SIPC():
             if arg == 1:
                 self._header.insert(3,('CN','491c23644b7769ede1af078cb14901e2'))
                 self._header.insert(4,('CL','type="pc",version="%s"'%FetionVer))
-
                 pass
             if arg == 2:
                 body = FetionLoginXML % (self.mobile_no,self._user_id,self.presence)
@@ -366,11 +365,11 @@ class SIPC():
             self._header.append(('L',len(body)))
         for k in self._header:
             self._content = self._content + k[0] + ": " + str(k[1]) + "\r\n"
-        self._content+="\r\n"
-        self._content+= body
+        self._content += "\r\n"
+        self._content += body
         if self.login_type == "HTTP":
             #IN TCP CONNECTION "SIPP" SHOULD NOT BEEN SEND
-            self._content+= FetionSIPP
+            self._content += FetionSIPP
         return self._content
 
     def ack(self):
@@ -385,6 +384,7 @@ class SIPC():
         if self._lock:
             self._lock.acquire()
         log('content:'+content)
+        #print "send content",content
         if self.login_type == "HTTP":
             #First time t SHOULD SET AS 'i'
             #Otherwise 405 code get
@@ -393,12 +393,14 @@ class SIPC():
             else:
                 t = 's'
             url = self._http_tunnel+"?t=%s&i=%s" % (t,self.__seq)
-            ret = http_send(url,content,self.__exheaders)
+            ret = http_send(url,"SIPP",self.__exheaders)
             if not ret:
                 raise PyFetionSocketError(405,'http stoped')
             response = ret.read()
-            self.__seq+=1
-            response = self.__sendSIPP()
+            #print "send response 1",response
+            self.__seq +=1
+            response = self.__sendSIPP(content)
+            #print "send response 2",response
             i = 0
             while response == FetionSIPP and i < 5:
                 response = self.__sendSIPP()
@@ -441,8 +443,11 @@ class SIPC():
 
 
 
-    def __sendSIPP(self):
-        body = FetionSIPP
+    def __sendSIPP(self, content = ""):
+        if content:
+            body = content#FetionSIPP
+        else:
+            body = FetionSIPP
         url = self._http_tunnel+"?t=s&i=%s" % self.__seq
         ret = http_send(url,body,self.__exheaders)
         if not ret:
@@ -600,14 +605,15 @@ def http_send(url,body='',exheaders='',login=False):
     headers.update(exheaders)
 
     log('url:'+url)
+    
     if proxy_info:
         proxy_support = urllib2.ProxyHandler(\
             {"http":"http://%(user)s:%(pass)s@%(host)s:%(port)d" % proxy_info})
         opener = urllib2.build_opener(proxy_support)
     else:
         opener = urllib2.build_opener()
-
     urllib2.install_opener(opener)
+    
     if body == '':
         request = urllib2.Request(url,headers=headers)
     else:
@@ -1259,8 +1265,9 @@ class PyFetion(SIPC):
         response = ''
         ret = ''
 
-        self.get("REG",1,response)
-        response = self.send()
+        self.get("REG",1,response)     # here lies
+        response = self.send()         # the problem
+        #print "__register:" + response
 
         while True:
             self.get("REG",2,response)
@@ -1324,6 +1331,12 @@ class PyFetion(SIPC):
         except:
             return False
         domain = "fetion.com.cn"
+        
+        # print "ssic",ssic
+        # print "sid",sid
+        # print "uri",uri
+        # print "user_id",user_id
+        # print "status",status 
 
         log(locals())
         self.sid = sid
