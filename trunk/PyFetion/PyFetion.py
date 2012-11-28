@@ -800,10 +800,10 @@ class PyFetion(SIPC):
         #replace global function with self method
 
         self.__sipc_url   = "https://uid.fetion.com.cn/ssiportal/SSIAppSignInV4.aspx"
-        self._sipc_proxy = "221.176.31.45:8080"
-        self._http_tunnel= "http://221.176.31.45/ht/sd.aspx"
+        self._sipc_proxy = "115.181.16.66:8080"
+        self._http_tunnel= "http://221.176.31.1/ht/sd.aspx"
         #uncomment this line for getting configuration from server
-        #self.__set_system_config()
+        #self.__get_system_config()
 
 
     def login(self,presence=FetionOnline):
